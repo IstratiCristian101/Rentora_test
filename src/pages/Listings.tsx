@@ -127,6 +127,7 @@ const Listings = () => {
                         }}
                     >
                         {filteredApartments.map((apartment, index) => (
+                            !apartment.Id_Renter&&
                             <Box
                                 key={apartment.Id_Apartment}
                                 sx={{

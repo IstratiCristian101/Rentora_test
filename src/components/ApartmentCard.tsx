@@ -14,7 +14,7 @@ import { memo } from "react";
 import type { Apartment } from "../types/apartment.types";
 import { useNavigate } from "react-router-dom";
 import { paths } from "../app/paths.ts";
-import { gradients, colors } from "../theme/gradients.ts";
+import {colors } from "../theme/gradients.ts";
 
 
 interface Props {
@@ -222,13 +222,12 @@ const ApartmentCard = ({ apartment, favorites, toggleFavorite, getUserName, getS
                         variant="contained"
                         disabled={isOccupied}
                         onClick={() => navigate(paths.apartmentDetail(apartment.Id_Apartment))}
-                        sx={{ px: 3 }}
                         sx={{
-                            color: apartment.Id_Renter !== null ? "#5C7A77" : "#071A1D",
+                            px:3,
+                            color: apartment.Id_Renter !== null ? "#071A1D":"#FFF",
                             fontWeight: 800,
                             textTransform: "none",
                             borderRadius: 2,
-                            px: 3,
                             boxShadow: apartment.Id_Renter !== null ? "none" : "0 0 12px rgba(0, 224, 198, 0.3)",
                             "&:hover": {
                                 boxShadow: "0 0 20px rgba(0, 224, 198, 0.4)",
