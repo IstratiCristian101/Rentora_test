@@ -1,4 +1,5 @@
-﻿// components/createListing/StepSpaceInfo.tsx
+﻿// src/components/createListing/StepSpaceInfo.tsx
+import { memo }              from "react";
 import { Box, Typography, TextField } from "@mui/material";
 import { MeetingRoom as RoomsIcon, AccessTime as TimeIcon, Lock as LockIcon, CheckCircle as CheckIcon } from "@mui/icons-material";
 import { TimePicker }            from "@mui/x-date-pickers/TimePicker";
@@ -7,7 +8,7 @@ import { LocalizationProvider }  from "@mui/x-date-pickers/LocalizationProvider"
 import dayjs                     from "dayjs";
 import { useTranslation }        from "react-i18next";
 import Section                   from "./Section.tsx";
-import type { FormState }        from "./types.ts";
+import type { FormState }        from "../../types/CreateListingTypes.ts";
 import { colors }                from "../../theme/gradients.ts";
 
 interface Props {
@@ -22,7 +23,8 @@ const timePickerProps = (zIndex = 1400) => ({
     popper:    { sx: { zIndex } },
 });
 
-const StepSpaceInfo = ({ form, set }: Props) => {
+// ✅ FIX: memo() previne re-randarea când form și set nu s-au schimbat.
+const StepSpaceInfo = memo(({ form, set }: Props) => {
     const { t } = useTranslation();
 
     const statFields = [
@@ -101,6 +103,8 @@ const StepSpaceInfo = ({ form, set }: Props) => {
             </Section>
         </LocalizationProvider>
     );
-};
+});
+
+StepSpaceInfo.displayName = "StepSpaceInfo";
 
 export default StepSpaceInfo;

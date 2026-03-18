@@ -1,7 +1,8 @@
-﻿// pages/CreateListing.tsx
+﻿// src/pages/CreateListing.tsx
+import { useCallback }    from "react";
 import { useNavigate }    from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Box, Container, Typography, Button, Alert, LinearProgress } from "@mui/material";
+import { Box, Container, Typography, Button, Alert } from "@mui/material";
 import { ArrowBack as ArrowBackIcon, Home as HomeIcon } from "@mui/icons-material";
 import { gradients, colors } from "../theme/gradients.ts";
 import { paths }             from "../app/paths.ts";
@@ -18,11 +19,33 @@ const CreateListing = () => {
     const navigate = useNavigate();
     const { t }    = useTranslation();
     const {
-        form, errors, submitted, progress,
+        form, errors, submitted,
         set, clearError, setFacility,
         handleImages, removeImage, addLandmark, removeLandmark,
         submit,
     } = useListingForm();
+
+    // ✅ FIX: callback-urile inline sunt memoizate ca să nu producă referințe noi
+    //         la fiecare render — altfel React.memo din copii nu are niciun efect.
+    const handleAddImages = useCallback(
+        (files: FileList | null) => handleImages(files, form.images.length),
+        [handleImages, form.images.length],
+    );
+
+    const handleRemoveImage = useCallback(
+        (idx: number) => removeImage(idx, form.imagePreviewUrls),
+        [removeImage, form.imagePreviewUrls],
+    );
+
+    const handleAddLandmark = useCallback(
+        () => addLandmark(form.landmarkInput),
+        [addLandmark, form.landmarkInput],
+    );
+
+    const handleSubmit = useCallback(
+        () => submit(() => setTimeout(() => navigate(paths.apartmentDetail(1)), 1500)),
+        [submit, navigate],
+    );
 
     if (submitted) return <SuccessScreen />;
 
@@ -35,7 +58,7 @@ const CreateListing = () => {
                 </Button>
 
                 <Box sx={{ mb: 4 }}>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1 }}>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                         <Box sx={{ background: gradients.primary, p: 1.5, borderRadius: 2, display: "flex", color: "white" }}>
                             <HomeIcon sx={{ fontSize: 28 }} />
                         </Box>
@@ -43,21 +66,6 @@ const CreateListing = () => {
                             <Typography variant="h4" fontWeight={900}>{t("createListing.title")}</Typography>
                             <Typography variant="body2" color="text.secondary">{t("createListing.subtitle")}</Typography>
                         </Box>
-                    </Box>
-
-                    <Box sx={{ mt: 3, p: 2.5, borderRadius: 3, bgcolor: "background.paper", border: `1px solid ${colors.border}` }}>
-                        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
-                            <Typography variant="caption" fontWeight={700} color="text.secondary">
-                                {t("createListing.progress")}
-                            </Typography>
-                            <Typography variant="caption" fontWeight={800} color="primary.main">
-                                {progress}%
-                            </Typography>
-                        </Box>
-                        <LinearProgress variant="determinate" value={progress}
-                                        sx={{ height: 8, borderRadius: 4, bgcolor: colors.primaryAlpha10,
-                                            "& .MuiLinearProgress-bar": { background: gradients.primary, borderRadius: 4 } }}
-                        />
                     </Box>
                 </Box>
 
@@ -69,10 +77,10 @@ const CreateListing = () => {
 
                 <StepBasicInfo   form={form} errors={errors} set={set} clearError={clearError} />
                 <StepPhotos      form={form} errors={errors}
-                                 onAddImages={(files) => handleImages(files, form.images.length)}
-                                 onRemoveImage={(idx) => removeImage(idx, form.imagePreviewUrls)} />
+                                 onAddImages={handleAddImages}
+                                 onRemoveImage={handleRemoveImage} />
                 <StepLocation    form={form} errors={errors} set={set} clearError={clearError}
-                                 onAddLandmark={() => addLandmark(form.landmarkInput)}
+                                 onAddLandmark={handleAddLandmark}
                                  onRemoveLandmark={removeLandmark} />
                 <StepFacilities  facilities={form.facilities} onToggle={setFacility} />
                 <StepSpaceInfo   form={form} set={set} />
@@ -83,8 +91,7 @@ const CreateListing = () => {
                             sx={{ py: 1.8, borderRadius: 2.5, fontWeight: 700 }}>
                         {t("createListing.cancel")}
                     </Button>
-                    <Button variant="contained" size="large" fullWidth
-                            onClick={() => submit(() => setTimeout(() => navigate(paths.apartmentDetail(1)), 1500))}
+                    <Button variant="contained" size="large" fullWidth onClick={handleSubmit}
                             sx={{ py: 1.8, borderRadius: 2.5, fontWeight: 800, fontSize: 16 }}>
                         {t("createListing.publish")}
                     </Button>

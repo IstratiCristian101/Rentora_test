@@ -1,6 +1,15 @@
-﻿// components/createListing/StepFacilities.tsx
-import { Box, Typography } from "@mui/material";
-import { Star as StarIcon, CheckCircle as CheckIcon, Wifi as WifiIcon, LocalParking as ParkingIcon, AcUnit as AcIcon, LocalFireDepartment as HeatingIcon, LocalLaundryService as WasherIcon, DryCleaningOutlined as DryerIcon, Kitchen as KitchenIcon, Tv as TvIcon, Balcony as BalconyIcon, Pool as PoolIcon, FitnessCenter as GymIcon, Elevator as ElevatorIcon, Pets as PetsIcon, SmokingRooms as SmokingIcon, Security as SecurityIcon, Lock as LockIcon } from "@mui/icons-material";
+﻿// src/components/createListing/StepFacilities.tsx
+import { memo }              from "react";
+import { Box, Typography }   from "@mui/material";
+import {
+    Star as StarIcon, CheckCircle as CheckIcon,
+    Wifi as WifiIcon, LocalParking as ParkingIcon, AcUnit as AcIcon,
+    LocalFireDepartment as HeatingIcon, LocalLaundryService as WasherIcon,
+    DryCleaningOutlined as DryerIcon, Kitchen as KitchenIcon, Tv as TvIcon,
+    Balcony as BalconyIcon, Pool as PoolIcon, FitnessCenter as GymIcon,
+    Elevator as ElevatorIcon, Pets as PetsIcon, SmokingRooms as SmokingIcon,
+    Security as SecurityIcon, Lock as LockIcon,
+} from "@mui/icons-material";
 import { useTranslation }    from "react-i18next";
 import Section               from "./Section.tsx";
 import { colors }            from "../../theme/gradients.ts";
@@ -10,7 +19,8 @@ interface Props { facilities: Facilities; onToggle: (key: keyof Facilities) => v
 
 const activeCount = (f: Facilities) => Object.values(f).filter(Boolean).length;
 
-const StepFacilities = ({ facilities, onToggle }: Props) => {
+// ✅ FIX: memo() previne re-randarea când facilities și onToggle nu s-au schimbat.
+const StepFacilities = memo(({ facilities, onToggle }: Props) => {
     const { t, i18n } = useTranslation();
     const isEn = i18n.language === "en";
 
@@ -43,8 +53,8 @@ const StepFacilities = ({ facilities, onToggle }: Props) => {
                 { key: "elevator", labelRo: "Ascensor",     labelEn: "Elevator",  icon: <ElevatorIcon /> },
             ]},
         { titleRo: "Politici", titleEn: "Policies", items: [
-                { key: "petFriendly",    labelRo: "Animale acceptate", labelEn: "Pets allowed",     icon: <PetsIcon /> },
-                { key: "smokingAllowed", labelRo: "Fumat permis",      labelEn: "Smoking allowed",  icon: <SmokingIcon /> },
+                { key: "petFriendly",    labelRo: "Animale acceptate", labelEn: "Pets allowed",    icon: <PetsIcon /> },
+                { key: "smokingAllowed", labelRo: "Fumat permis",      labelEn: "Smoking allowed", icon: <SmokingIcon /> },
             ]},
         { titleRo: "Securitate", titleEn: "Security", items: [
                 { key: "securityCamera", labelRo: "Cameră securitate", labelEn: "Security camera", icon: <SecurityIcon /> },
@@ -95,6 +105,8 @@ const StepFacilities = ({ facilities, onToggle }: Props) => {
             </Box>
         </Section>
     );
-};
+});
+
+StepFacilities.displayName = "StepFacilities";
 
 export default StepFacilities;

@@ -1,4 +1,5 @@
-﻿// components/createListing/StepBasicInfo.tsx
+﻿// src/components/createListing/StepBasicInfo.tsx
+import { memo }              from "react";
 import { Box, TextField, Typography, ToggleButtonGroup, ToggleButton } from "@mui/material";
 import { Home as HomeIcon }  from "@mui/icons-material";
 import { useTranslation }    from "react-i18next";
@@ -14,7 +15,9 @@ interface Props {
     clearError: (key: string) => void;
 }
 
-const StepBasicInfo = ({ form, errors, set, clearError }: Props) => {
+// ✅ FIX: memo() previne re-randarea când props-urile nu s-au schimbat.
+//         Funcționează corect doar dacă `set` și `clearError` sunt stabile (useCallback).
+const StepBasicInfo = memo(({ form, errors, set, clearError }: Props) => {
     const { t } = useTranslation();
     return (
         <Section icon={<HomeIcon sx={{ fontSize: 24 }} />}
@@ -71,6 +74,8 @@ const StepBasicInfo = ({ form, errors, set, clearError }: Props) => {
             </Box>
         </Section>
     );
-};
+});
+
+StepBasicInfo.displayName = "StepBasicInfo";
 
 export default StepBasicInfo;

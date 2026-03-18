@@ -1,9 +1,10 @@
-﻿// components/createListing/StepLocation.tsx
+﻿// src/components/createListing/StepLocation.tsx
+import { memo }              from "react";
 import { Box, TextField, Typography, Button, Chip } from "@mui/material";
 import { LocationOn as LocationOnIcon, Add as AddIcon } from "@mui/icons-material";
 import { useTranslation }    from "react-i18next";
 import Section               from "./Section.tsx";
-import type { FormState, Errors } from "./types.ts";
+import type { FormState, Errors } from "../../types/CreateListingTypes.ts";
 import { colors }            from "../../theme/gradients.ts";
 
 interface Props {
@@ -13,7 +14,8 @@ interface Props {
     onAddLandmark: () => void; onRemoveLandmark: (i: number) => void;
 }
 
-const StepLocation = ({ form, errors, set, clearError, onAddLandmark, onRemoveLandmark }: Props) => {
+// ✅ FIX: memo() previne re-randarea când props-urile nu s-au schimbat.
+const StepLocation = memo(({ form, errors, set, clearError, onAddLandmark, onRemoveLandmark }: Props) => {
     const { t } = useTranslation();
     return (
         <Section icon={<LocationOnIcon sx={{ fontSize: 24 }} />}
@@ -66,6 +68,8 @@ const StepLocation = ({ form, errors, set, clearError, onAddLandmark, onRemoveLa
             </Box>
         </Section>
     );
-};
+});
+
+StepLocation.displayName = "StepLocation";
 
 export default StepLocation;

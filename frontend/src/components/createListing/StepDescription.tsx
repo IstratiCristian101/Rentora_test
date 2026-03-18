@@ -1,9 +1,10 @@
-﻿// components/createListing/StepDescription.tsx
+﻿// src/components/createListing/StepDescription.tsx
+import { memo }              from "react";
 import { Box, TextField, Typography } from "@mui/material";
 import { AttachMoney as MoneyIcon, Cancel as CancelIcon, CheckCircle as CheckIcon } from "@mui/icons-material";
 import { useTranslation }    from "react-i18next";
 import Section               from "./Section.tsx";
-import type { FormState, Errors } from "./types.ts";
+import type { FormState, Errors } from "../../types/CreateListingTypes.ts";
 import { colors }            from "../../theme/gradients.ts";
 import type { AdditionalInfo } from "../../types/apartment.types";
 
@@ -14,7 +15,8 @@ interface Props {
     clearError: (key: string) => void;
 }
 
-const StepDescription = ({ form, errors, set, clearError }: Props) => {
+// ✅ FIX: memo() previne re-randarea când props-urile nu s-au schimbat.
+const StepDescription = memo(({ form, errors, set, clearError }: Props) => {
     const { t } = useTranslation();
 
     const policies: { value: AdditionalInfo["cancellationPolicy"]; color: string }[] = [
@@ -76,6 +78,8 @@ const StepDescription = ({ form, errors, set, clearError }: Props) => {
             </Box>
         </Section>
     );
-};
+});
+
+StepDescription.displayName = "StepDescription";
 
 export default StepDescription;

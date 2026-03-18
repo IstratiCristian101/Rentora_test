@@ -1,10 +1,10 @@
-﻿// components/createListing/StepPhotos.tsx
-import { useRef }            from "react";
+﻿// src/components/createListing/StepPhotos.tsx
+import { memo, useRef }      from "react";
 import { Box, Typography, IconButton } from "@mui/material";
 import { CloudUpload as UploadIcon, Close as CloseIcon, Add as AddIcon, PhotoCamera as CameraIcon } from "@mui/icons-material";
 import { useTranslation }    from "react-i18next";
 import Section               from "./Section.tsx";
-import type { FormState, Errors } from "./types.ts";
+import type { FormState, Errors } from "../../types/CreateListingTypes.ts";
 import { colors }            from "../../theme/gradients.ts";
 
 interface Props {
@@ -13,8 +13,9 @@ interface Props {
     onRemoveImage: (idx: number) => void;
 }
 
-const StepPhotos = ({ form, errors, onAddImages, onRemoveImage }: Props) => {
-    const { t }       = useTranslation();
+// ✅ FIX: memo() previne re-randarea când props-urile nu s-au schimbat.
+const StepPhotos = memo(({ form, errors, onAddImages, onRemoveImage }: Props) => {
+    const { t }        = useTranslation();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     return (
@@ -65,6 +66,8 @@ const StepPhotos = ({ form, errors, onAddImages, onRemoveImage }: Props) => {
             )}
         </Section>
     );
-};
+});
+
+StepPhotos.displayName = "StepPhotos";
 
 export default StepPhotos;
