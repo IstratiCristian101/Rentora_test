@@ -1,35 +1,39 @@
 ﻿// src/components/createListing/StepBasicInfo.tsx
-import { memo }              from "react";
-import { Box, TextField, Typography, ToggleButtonGroup, ToggleButton } from "@mui/material";
+import React, { memo }              from "react";
+import { Box, Typography, ToggleButtonGroup, ToggleButton } from "@mui/material";
 import { Home as HomeIcon }  from "@mui/icons-material";
 import { useTranslation }    from "react-i18next";
 import Section               from "./Section.tsx";
+import DebouncedTextField    from "../common/DebouncedTextField.tsx";
 import type { FormState, Errors } from "../../types/CreateListingTypes.ts";
 import { toggleSx }          from "../../types/CreateListingTypes.ts";
 import type { Currency, RentInterval } from "../../types/apartment.types";
 
 interface Props {
-    form:       FormState;
+    address:    string;
+    cost:       string;
+    currency:   Currency;
+    interval:   RentInterval;
     errors:     Errors;
     set:        <K extends keyof FormState>(key: K, value: FormState[K]) => void;
     clearError: (key: string) => void;
 }
 
-// ✅ FIX: memo() previne re-randarea când props-urile nu s-au schimbat.
-//         Funcționează corect doar dacă `set` și `clearError` sunt stabile (useCallback).
-const StepBasicInfo = memo(({ form, errors, set, clearError }: Props) => {
+const icon = <HomeIcon sx={{ fontSize: 24 }} />;
+
+const StepBasicInfo = memo(({ address, cost, currency, interval, errors, set, clearError }: Props) => {
     const { t } = useTranslation();
     return (
-        <Section icon={<HomeIcon sx={{ fontSize: 24 }} />}
+        <Section icon={icon}
                  title={t("createListing.steps.basic.title")}
                  subtitle={t("createListing.steps.basic.subtitle")}
                  step={1}>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-                <TextField
+                <DebouncedTextField
                     label={t("components.steps.basic.addressLabel")}
                     placeholder={t("components.steps.basic.addressPlaceholder")}
-                    value={form.address}
-                    onChange={e => { set("address", e.target.value); clearError("address"); }}
+                    value={address}
+                    onChange={(v) => { set("address", v as any); clearError("address"); }}
                     error={!!errors.address} helperText={errors.address}
                     fullWidth
                 />
@@ -38,14 +42,14 @@ const StepBasicInfo = memo(({ form, errors, set, clearError }: Props) => {
                         {t("components.steps.basic.priceInterval")}
                     </Typography>
                     <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, gap: 2 }}>
-                        <TextField
+                        <DebouncedTextField
                             label={t("components.steps.basic.price")} type="number" sx={{ flex: 2 }}
-                            value={form.cost} inputProps={{ min: 0, onWheel: (e: any) => e.currentTarget.blur() }}
-                            onChange={e => { set("cost", e.target.value); clearError("cost"); }}
+                            value={cost} inputProps={{ min: 0, onWheel: (e: any) => e.currentTarget.blur() }}
+                            onChange={(v) => { set("cost", v as any); clearError("cost"); }}
                             error={!!errors.cost} helperText={errors.cost}
                         />
                         <Box sx={{ flex: 3 }}>
-                            <ToggleButtonGroup value={form.currency} exclusive
+                            <ToggleButtonGroup value={currency} exclusive
                                                onChange={(_, v) => { if (v) set("currency", v); }}
                                                sx={{ ...toggleSx, height: 56, "& .MuiToggleButton-root": { ...toggleSx["& .MuiToggleButton-root"], flex: 1 } }}>
                                 {(["USD", "EUR", "MDL"] as Currency[]).map(c => (
@@ -58,7 +62,7 @@ const StepBasicInfo = memo(({ form, errors, set, clearError }: Props) => {
                         <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ display: "block", mb: 1 }}>
                             {t("components.steps.basic.rentalInterval")}
                         </Typography>
-                        <ToggleButtonGroup value={form.interval} exclusive
+                        <ToggleButtonGroup value={interval} exclusive
                                            onChange={(_, v) => { if (v) set("interval", v); }}
                                            sx={toggleSx}>
                             {([
@@ -77,5 +81,4 @@ const StepBasicInfo = memo(({ form, errors, set, clearError }: Props) => {
 });
 
 StepBasicInfo.displayName = "StepBasicInfo";
-
 export default StepBasicInfo;

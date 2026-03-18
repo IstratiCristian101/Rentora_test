@@ -4,16 +4,18 @@ import { useNavigate }    from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Box, Container, Typography, Button, Alert } from "@mui/material";
 import { ArrowBack as ArrowBackIcon, Home as HomeIcon } from "@mui/icons-material";
-import { gradients, colors } from "../theme/gradients.ts";
-import { paths }             from "../app/paths.ts";
-import { useListingForm }    from "../types/UseListingForm.ts";
-import SuccessScreen         from "../components/createListing/SuccessScreen.tsx";
-import StepBasicInfo         from "../components/createListing/StepBasicInfo.tsx";
-import StepPhotos            from "../components/createListing/StepPhotos.tsx";
-import StepLocation          from "../components/createListing/StepLocation.tsx";
-import StepFacilities        from "../components/createListing/StepFacilities.tsx";
-import StepSpaceInfo         from "../components/createListing/StepSpaceInfo.tsx";
-import StepDescription       from "../components/createListing/StepDescription.tsx";
+import { gradients } from "../theme/gradients.ts";
+import { paths }     from "../app/paths.ts";
+import { useListingForm } from "../types/UseListingForm.ts";
+import SuccessScreen      from "../components/createListing/SuccessScreen.tsx";
+import StepBasicInfo      from "../components/createListing/StepBasicInfo.tsx";
+import StepPhotos         from "../components/createListing/StepPhotos.tsx";
+import StepLocation       from "../components/createListing/StepLocation.tsx";
+import StepFacilities     from "../components/createListing/StepFacilities.tsx";
+import StepSpaceInfo      from "../components/createListing/StepSpaceInfo.tsx";
+import StepDescription    from "../components/createListing/StepDescription.tsx";
+
+const headerIcon = <HomeIcon sx={{ fontSize: 28 }} />;
 
 const CreateListing = () => {
     const navigate = useNavigate();
@@ -25,23 +27,18 @@ const CreateListing = () => {
         submit,
     } = useListingForm();
 
-    // ✅ FIX: callback-urile inline sunt memoizate ca să nu producă referințe noi
-    //         la fiecare render — altfel React.memo din copii nu are niciun efect.
     const handleAddImages = useCallback(
         (files: FileList | null) => handleImages(files, form.images.length),
         [handleImages, form.images.length],
     );
-
     const handleRemoveImage = useCallback(
         (idx: number) => removeImage(idx, form.imagePreviewUrls),
         [removeImage, form.imagePreviewUrls],
     );
-
     const handleAddLandmark = useCallback(
         () => addLandmark(form.landmarkInput),
         [addLandmark, form.landmarkInput],
     );
-
     const handleSubmit = useCallback(
         () => submit(() => setTimeout(() => navigate(paths.apartmentDetail(1)), 1500)),
         [submit, navigate],
@@ -60,7 +57,7 @@ const CreateListing = () => {
                 <Box sx={{ mb: 4 }}>
                     <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                         <Box sx={{ background: gradients.primary, p: 1.5, borderRadius: 2, display: "flex", color: "white" }}>
-                            <HomeIcon sx={{ fontSize: 28 }} />
+                            {headerIcon}
                         </Box>
                         <Box>
                             <Typography variant="h4" fontWeight={900}>{t("createListing.title")}</Typography>
@@ -75,16 +72,65 @@ const CreateListing = () => {
                     </Alert>
                 )}
 
-                <StepBasicInfo   form={form} errors={errors} set={set} clearError={clearError} />
-                <StepPhotos      form={form} errors={errors}
-                                 onAddImages={handleAddImages}
-                                 onRemoveImage={handleRemoveImage} />
-                <StepLocation    form={form} errors={errors} set={set} clearError={clearError}
-                                 onAddLandmark={handleAddLandmark}
-                                 onRemoveLandmark={removeLandmark} />
-                <StepFacilities  facilities={form.facilities} onToggle={setFacility} />
-                <StepSpaceInfo   form={form} set={set} />
-                <StepDescription form={form} errors={errors} set={set} clearError={clearError} />
+                {/* ✅ Props individuale — memo poate compara primitive, nu obiecte */}
+                <StepBasicInfo
+                    address={form.address}
+                    cost={form.cost}
+                    currency={form.currency}
+                    interval={form.interval}
+                    errors={errors}
+                    set={set}
+                    clearError={clearError}
+                />
+                <StepPhotos
+                    images={form.images}
+                    imagePreviewUrls={form.imagePreviewUrls}
+                    errors={errors}
+                    onAddImages={handleAddImages}
+                    onRemoveImage={handleRemoveImage}
+                />
+                <StepLocation
+                    city={form.city}
+                    region={form.region}
+                    postalCode={form.postalCode}
+                    latitude={form.latitude}
+                    longitude={form.longitude}
+                    landmarks={form.landmarks}
+                    landmarkInput={form.landmarkInput}
+                    errors={errors}
+                    set={set}
+                    clearError={clearError}
+                    onAddLandmark={handleAddLandmark}
+                    onRemoveLandmark={removeLandmark}
+                />
+                <StepFacilities
+                    facilities={form.facilities}
+                    onToggle={setFacility}
+                />
+                <StepSpaceInfo
+                    rooms={form.rooms}
+                    bedrooms={form.bedrooms}
+                    bathrooms={form.bathrooms}
+                    beds={form.beds}
+                    surfaceArea={form.surfaceArea}
+                    maxGuests={form.maxGuests}
+                    floor={form.floor}
+                    totalFloors={form.totalFloors}
+                    checkInFrom={form.checkInFrom}
+                    checkInUntil={form.checkInUntil}
+                    checkOutFrom={form.checkOutFrom}
+                    checkOutUntil={form.checkOutUntil}
+                    selfCheckIn={form.selfCheckIn}
+                    set={set}
+                />
+                <StepDescription
+                    description={form.description}
+                    houseRules={form.houseRules}
+                    cancellationPolicy={form.cancellationPolicy}
+                    errors={errors}
+                    set={set}
+                    clearError={clearError}
+                />
 
                 <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, gap: 2, mb: 6 }}>
                     <Button variant="outlined" size="large" fullWidth onClick={() => navigate(-1)}
