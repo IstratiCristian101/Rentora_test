@@ -1,20 +1,26 @@
-﻿// components/createListing/StepDescription.tsx
-import { Box, TextField, Typography } from "@mui/material";
+﻿// src/components/createListing/StepDescription.tsx
+import React, { memo }       from "react";
+import { Box, Typography }   from "@mui/material";
 import { AttachMoney as MoneyIcon, Cancel as CancelIcon, CheckCircle as CheckIcon } from "@mui/icons-material";
 import { useTranslation }    from "react-i18next";
 import Section               from "./Section.tsx";
-import type { FormState, Errors } from "./types.ts";
+import DebouncedTextField    from "../common/DebouncedTextField.tsx";
+import type { FormState, Errors } from "../../types/CreateListingTypes.ts";
 import { colors }            from "../../theme/gradients.ts";
 import type { AdditionalInfo } from "../../types/apartment.types";
 
 interface Props {
-    form:       FormState;
-    errors:     Errors;
-    set:        <K extends keyof FormState>(key: K, value: FormState[K]) => void;
-    clearError: (key: string) => void;
+    description:        string;
+    houseRules:         string;
+    cancellationPolicy: AdditionalInfo["cancellationPolicy"];
+    errors:             Errors;
+    set:                <K extends keyof FormState>(key: K, value: FormState[K]) => void;
+    clearError:         (key: string) => void;
 }
 
-const StepDescription = ({ form, errors, set, clearError }: Props) => {
+const icon = <MoneyIcon sx={{ fontSize: 24 }} />;
+
+const StepDescription = memo(({ description, houseRules, cancellationPolicy, errors, set, clearError }: Props) => {
     const { t } = useTranslation();
 
     const policies: { value: AdditionalInfo["cancellationPolicy"]; color: string }[] = [
@@ -24,23 +30,23 @@ const StepDescription = ({ form, errors, set, clearError }: Props) => {
     ];
 
     return (
-        <Section icon={<MoneyIcon sx={{ fontSize: 24 }} />}
+        <Section icon={icon}
                  title={t("createListing.steps.description.title")}
                  subtitle={t("createListing.steps.description.subtitle")}
                  step={6}>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-                <TextField
+                <DebouncedTextField
                     label={t("components.steps.description.descLabel")} multiline rows={4} fullWidth
                     placeholder={t("components.steps.description.descPlaceholder")}
-                    value={form.description}
-                    onChange={e => { set("description", e.target.value); clearError("description"); }}
+                    value={description}
+                    onChange={(v) => { set("description", v as any); clearError("description"); }}
                     error={!!errors.description} helperText={errors.description}
                 />
-                <TextField
+                <DebouncedTextField
                     label={t("components.steps.description.rulesLabel")} multiline rows={3} fullWidth
                     placeholder={t("components.steps.description.rulesPlaceholder")}
-                    value={form.houseRules}
-                    onChange={e => set("houseRules", e.target.value)}
+                    value={houseRules}
+                    onChange={(v) => set("houseRules", v as any)}
                 />
                 <Box>
                     <Typography variant="body2" fontWeight={700} color="text.secondary" sx={{ mb: 1.5 }}>
@@ -49,7 +55,7 @@ const StepDescription = ({ form, errors, set, clearError }: Props) => {
                     </Typography>
                     <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, gap: 2 }}>
                         {policies.map(opt => {
-                            const active = form.cancellationPolicy === opt.value;
+                            const active = cancellationPolicy === opt.value;
                             const key    = opt.value as "flexible" | "moderate" | "strict";
                             return (
                                 <Box key={opt.value} onClick={() => set("cancellationPolicy", opt.value)} sx={{
@@ -76,6 +82,7 @@ const StepDescription = ({ form, errors, set, clearError }: Props) => {
             </Box>
         </Section>
     );
-};
+});
 
+StepDescription.displayName = "StepDescription";
 export default StepDescription;

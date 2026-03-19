@@ -1,7 +1,8 @@
-﻿// components/settings/SecuritySection.tsx
-import { Button, Grid, TextField } from "@mui/material";
+﻿// src/components/settings/SecuritySection.tsx
+import { Button, Grid } from "@mui/material";
 import { useTranslation }          from "react-i18next";
 import SettingsSectionWrapper      from "./SettingsSectionWraper.tsx";
+import DebouncedTextField          from "../common/DebouncedTextField.tsx";
 import type { PasswordForm }       from "../../hooks/useSettingsForm";
 
 interface Props {
@@ -21,31 +22,31 @@ export default function SecuritySection({ password, saving, onUpdate, onSave }: 
         >
             <Grid container spacing={2.5}>
                 <Grid item xs={12} sm={6}>
-                    <TextField fullWidth label={t("settings.security.current")} size="small"
-                               type="password"
-                               value={password.oldPassword}
-                               onChange={(e) => onUpdate("oldPassword", e.target.value)}
+                    <DebouncedTextField fullWidth label={t("settings.security.current")} size="small"
+                                        type="password"
+                                        value={password.oldPassword}
+                                        onChange={(v) => onUpdate("oldPassword", v)}
                     />
                 </Grid>
                 <Grid item xs={12} />
                 <Grid item xs={12} sm={6}>
-                    <TextField fullWidth label={t("settings.security.new")} size="small"
-                               type="password"
-                               value={password.newPassword}
-                               onChange={(e) => onUpdate("newPassword", e.target.value)}
+                    <DebouncedTextField fullWidth label={t("settings.security.new")} size="small"
+                                        type="password"
+                                        value={password.newPassword}
+                                        onChange={(v) => onUpdate("newPassword", v)}
                     />
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                    <TextField fullWidth label={t("settings.security.confirm")} size="small"
-                               type="password"
-                               value={password.confirmPassword}
-                               onChange={(e) => onUpdate("confirmPassword", e.target.value)}
-                               error={!!password.confirmPassword && password.newPassword !== password.confirmPassword}
-                               helperText={
-                                   !!password.confirmPassword && password.newPassword !== password.confirmPassword
-                                       ? t("settings.security.mismatch")
-                                       : ""
-                               }
+                    <DebouncedTextField fullWidth label={t("settings.security.confirm")} size="small"
+                                        type="password"
+                                        value={password.confirmPassword}
+                                        onChange={(v) => onUpdate("confirmPassword", v)}
+                                        error={!!password.confirmPassword && password.newPassword !== password.confirmPassword}
+                                        helperText={
+                                            !!password.confirmPassword && password.newPassword !== password.confirmPassword
+                                                ? t("settings.security.mismatch")
+                                                : ""
+                                        }
                     />
                 </Grid>
                 <Grid item xs={12}>
