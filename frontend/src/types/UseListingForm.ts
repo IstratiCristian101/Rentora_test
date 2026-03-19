@@ -1,4 +1,5 @@
-﻿import { useState, useCallback } from "react";
+﻿// src/types/UseListingForm.ts
+import { useState, useCallback } from "react";
 import type { Facilities } from "./apartment.types";
 import { initialForm, validate, type FormState, type Errors } from "./CreateListingTypes.ts";
 
@@ -7,14 +8,19 @@ export const useListingForm = () => {
     const [errors, setErrors]       = useState<Errors>({});
     const [submitted, setSubmitted] = useState(false);
 
-    const set = <K extends keyof FormState>(key: K, value: FormState[K]) =>
-        setForm(prev => ({ ...prev, [key]: value }));
+    // ✅ FIX: useCallback previne crearea de referințe noi la fiecare render,
+    //         ceea ce oprea React.memo din componentele copil să funcționeze.
+    const set = useCallback(<K extends keyof FormState>(key: K, value: FormState[K]) =>
+        setForm(prev => ({ ...prev, [key]: value })), []);
 
-    const clearError = (key: string) =>
-        setErrors(prev => ({ ...prev, [key]: undefined }));
+    const clearError = useCallback((key: string) =>
+        setErrors(prev => ({ ...prev, [key]: undefined })), []);
 
-    const setFacility = (key: keyof Facilities) =>
-        setForm(prev => ({ ...prev, facilities: { ...prev.facilities, [key]: !prev.facilities[key] } }));
+    const setFacility = useCallback((key: keyof Facilities) =>
+        setForm(prev => ({
+            ...prev,
+            facilities: { ...prev.facilities, [key]: !prev.facilities[key] },
+        })), []);
 
     const handleImages = useCallback((files: FileList | null, currentCount: number) => {
         if (!files) return;
@@ -25,34 +31,40 @@ export const useListingForm = () => {
             images:           [...prev.images, ...newFiles],
             imagePreviewUrls: [...prev.imagePreviewUrls, ...newUrls],
         }));
-        clearError("images");
+        // ✅ Nu mai apelăm clearError (referință externă) — actualizăm direct
+        setErrors(prev => ({ ...prev, images: undefined }));
     }, []);
 
-    const removeImage = (idx: number, previewUrls: string[]) => {
+    const removeImage = useCallback((idx: number, previewUrls: string[]) => {
         URL.revokeObjectURL(previewUrls[idx]);
         setForm(prev => ({
             ...prev,
             images:           prev.images.filter((_, i) => i !== idx),
             imagePreviewUrls: prev.imagePreviewUrls.filter((_, i) => i !== idx),
         }));
-    };
+    }, []);
 
-    const addLandmark = (input: string) => {
+    const addLandmark = useCallback((input: string) => {
         const val = input.trim();
         if (!val) return;
         setForm(prev => ({ ...prev, landmarks: [...prev.landmarks, val], landmarkInput: "" }));
-    };
+    }, []);
 
-    const removeLandmark = (i: number) =>
-        setForm(prev => ({ ...prev, landmarks: prev.landmarks.filter((_, j) => j !== i) }));
+    const removeLandmark = useCallback((i: number) =>
+        setForm(prev => ({ ...prev, landmarks: prev.landmarks.filter((_, j) => j !== i) })), []);
 
-    const submit = (onSuccess: () => void) => {
-        const e = validate(form);
-        setErrors(e);
-        if (Object.keys(e).length > 0) return;
-        setSubmitted(true);
-        onSuccess();
-    };
+    // ✅ FIX: submit citește form-ul curent din setter pentru a evita stale closure
+    const submit = useCallback((onSuccess: () => void) => {
+        setForm(current => {
+            const e = validate(current);
+            setErrors(e);
+            if (Object.keys(e).length === 0) {
+                setSubmitted(true);
+                onSuccess();
+            }
+            return current;
+        });
+    }, []);
 
     const progress = (() => {
         const activeFacilities = Object.values(form.facilities).filter(Boolean).length;

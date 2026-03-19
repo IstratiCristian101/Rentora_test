@@ -1,4 +1,5 @@
-﻿// components/createListing/Section.tsx
+﻿// src/components/createListing/Section.tsx
+import React, { memo }       from "react";
 import { Box, Paper, Typography, Chip, Divider } from "@mui/material";
 import { useTranslation }    from "react-i18next";
 import { gradients, colors } from "../../theme/gradients.ts";
@@ -11,7 +12,9 @@ interface Props {
     children:  React.ReactNode;
 }
 
-const Section = ({ icon, title, subtitle, step, children }: Props) => {
+// ✅ FIX: memo previne re-randarea când title/subtitle/step nu s-au schimbat.
+// icon e ReactNode deci nu poate fi comparat stabil — dar title/subtitle sunt string-uri stabile.
+const Section = memo(({ icon, title, subtitle, step, children }: Props) => {
     const { t } = useTranslation();
     return (
         <Paper elevation={1} sx={{ p: { xs: 3, sm: 4 }, borderRadius: 4, border: `1px solid ${colors.border}`, mb: 3 }}>
@@ -32,6 +35,8 @@ const Section = ({ icon, title, subtitle, step, children }: Props) => {
             {children}
         </Paper>
     );
-};
+});
+
+Section.displayName = "Section";
 
 export default Section;
