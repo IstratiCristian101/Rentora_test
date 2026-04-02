@@ -8,4 +8,5 @@ public class BusinessLogic
     public BusinessLogic() { }
 
     public IUserAction UserAction() => new UserActionExecution();
+	public ISupportRequestAction SupportRequestAction() => new SupportRequestExecution();
 }
