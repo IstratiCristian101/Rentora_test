@@ -7,7 +7,8 @@ namespace Rentora.BusinessLayer.Interfaces
     {
         List<SupportRequestDto> GetAll();
         SupportRequestDto? GetById(int id);
-        ActionResponse Create(int? userId, SupportRequestCreateDto data);
+        ActionResponse Create(SupportRequestCreateDto data);
+        ActionResponse Delete(int id);
         ActionResponse UpdateStatus(int id, string status);
     }
 }
