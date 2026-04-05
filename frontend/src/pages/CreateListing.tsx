@@ -43,15 +43,15 @@ const CreateListing = () => {
     const [apiError, setApiError] = useState<string | null>(null);
 
     const handleSubmit = useCallback(
-        () => submit(async () => {
+        () => submit(async (markDone) => {
             setApiError(null);
             try {
                 await apartmentService.create(1, buildCreatePayload(form));
+                markDone();
+                setTimeout(() => navigate(paths.apartmentDetail(1)), 1500);
             } catch {
                 setApiError("Eroare la salvarea anunțului. Verificați conexiunea și încercați din nou.");
-                return;
             }
-            setTimeout(() => navigate(paths.apartmentDetail(1)), 1500);
         }),
         [submit, navigate, form],
     );

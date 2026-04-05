@@ -1,8 +1,10 @@
 import axiosInstance from "../api/axiosInstance";
 import type { Apartment } from "../types/apartment.types";
 import { defaultFacilities } from "../types/CreateListingTypes";
+import type { FormState } from "../types/CreateListingTypes";
 import {
     RentIntervalApi,
+    RentModeApi,
     CancellationPolicyApi,
     type ApartmentApiDto,
     type ApartmentCreateApiDto,
@@ -74,9 +76,6 @@ const CANCELLATION_TO_API: Record<Apartment["additionalInfo"]["cancellationPolic
     moderate: CancellationPolicyApi.Moderate,
     strict:   CancellationPolicyApi.Strict,
 };
-
-import type { FormState } from "../types/CreateListingTypes";
-import { RentModeApi } from "../types/ApartmentApiDto";
 
 export function buildCreatePayload(form: FormState): ApartmentCreateApiDto {
     return {

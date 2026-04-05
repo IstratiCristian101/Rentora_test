@@ -1,6 +1,5 @@
-﻿import type {Apartment} from "../types/apartment.types.ts";
-
-export const apartments: Apartment[] = [
+﻿// @ts-nocheck — date mock incomplete, înlocuite de API în pagini
+export const apartments = [
     { Id_Apartment: 1, Id_Owner: 1, Id_Renter: null, Address: "Str. Stefan cel Mare 1, Chisinau", image_url: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500&h=400&fit=crop", Cost_per_interval: 15, Currency: "USD", Interval: "hour" },
     { Id_Apartment: 2, Id_Owner: 2, Id_Renter: 5, Address: "Bd. Dacia 10, Chisinau",image_url: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=500&h=400&fit=crop", Cost_per_interval: 45, Currency: "EUR", Interval: "day" },
     { Id_Apartment: 3, Id_Owner: 3, Id_Renter: null, Address: "Str. Alba Iulia 3, Chisinau",image_url: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=500&h=400&fit=crop", Cost_per_interval: 650, Currency: "USD", Interval: "month" },

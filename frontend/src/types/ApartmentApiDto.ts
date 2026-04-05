@@ -1,21 +1,13 @@
 // Tipuri care corespund exact cu backend-ul (C# enums ca numere, camelCase)
 
-export enum RentIntervalApi {
-    Hour  = 0,
-    Day   = 1,
-    Month = 2,
-}
+export const RentIntervalApi = { Hour: 0, Day: 1, Month: 2 } as const;
+export type  RentIntervalApi = typeof RentIntervalApi[keyof typeof RentIntervalApi];
 
-export enum RentModeApi {
-    ShortTerm = 0,
-    LongTerm  = 1,
-}
+export const RentModeApi = { ShortTerm: 0, LongTerm: 1 } as const;
+export type  RentModeApi = typeof RentModeApi[keyof typeof RentModeApi];
 
-export enum CancellationPolicyApi {
-    Flexible = 0,
-    Moderate = 1,
-    Strict   = 2,
-}
+export const CancellationPolicyApi = { Flexible: 0, Moderate: 1, Strict: 2 } as const;
+export type  CancellationPolicyApi = typeof CancellationPolicyApi[keyof typeof CancellationPolicyApi];
 
 export interface MapLocationApi {
     lat:         number;
@@ -37,16 +29,16 @@ export interface AdditionalInfoApi {
 }
 
 export interface ApartmentApiDto {
-    id:               number;
-    ownedId:          number;
-    renterId:         number | null;
-    address:          string;
-    imageUrl:         string | null;
-    interval:         RentIntervalApi;
-    costPerInterval:  number;
-    rentMode:         RentModeApi;
-    location:         MapLocationApi;
-    additionalInfo:   AdditionalInfoApi;
+    id:              number;
+    ownedId:         number;
+    renterId:        number | null;
+    address:         string;
+    imageUrl:        string | null;
+    interval:        RentIntervalApi;
+    costPerInterval: number;
+    rentMode:        RentModeApi;
+    location:        MapLocationApi;
+    additionalInfo:  AdditionalInfoApi;
 }
 
 export interface ApartmentCreateApiDto {
