@@ -11,4 +11,5 @@ public class BusinessLogic
     public ISupportRequestAction SupportRequestAction() => new SupportRequestExecution();
     public IApartmentAction ApartmentAction() => new ApartmentActionExecution();
     public IReviewAction ReviewAction() => new ReviewActionExecution();
+    public IRecentViewAction RecentViewAction() => new RecentViewActionExecution();
 }
