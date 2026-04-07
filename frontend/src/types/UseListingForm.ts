@@ -54,13 +54,13 @@ export const useListingForm = () => {
         setForm(prev => ({ ...prev, landmarks: prev.landmarks.filter((_, j) => j !== i) })), []);
 
     // ✅ FIX: submit citește form-ul curent din setter pentru a evita stale closure
-    const submit = useCallback((onSuccess: () => void) => {
+    // onSuccess primește markDone() — trebuie apelat explicit după ce operația async s-a terminat
+    const submit = useCallback((onSuccess: (markDone: () => void) => void) => {
         setForm(current => {
             const e = validate(current);
             setErrors(e);
             if (Object.keys(e).length === 0) {
-                setSubmitted(true);
-                onSuccess();
+                onSuccess(() => setSubmitted(true));
             }
             return current;
         });

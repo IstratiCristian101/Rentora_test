@@ -1,13 +1,16 @@
 ﻿// pages/ApartmentDetail.tsx
 import { useParams, useNavigate } from "react-router-dom";
-import { useMemo, useState }      from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation }         from "react-i18next";
 import { Box, Container, Typography, Button, Chip, Alert, Paper, Tabs, Tab } from "@mui/material";
 import { ArrowBack as ArrowBackIcon, LocationOn as LocationOnIcon, Wifi as WifiIcon, MeetingRoom as RoomsIcon, Star as StarIcon } from "@mui/icons-material";
-import { apartments }        from "../mockdata/apartments";
+import type { Apartment }    from "../types/apartment.types";
 import { users }             from "../mockdata/users";
 import { colors }            from "../theme/gradients.ts";
-import { getApartmentLocation, getApartmentFacilities, getApartmentInfo, getApartmentReviews } from "../mockdata/Apartmentdetails.ts";
+import { apartmentService }  from "../services/apartmentService.ts";
+import { reviewService }     from "../services/reviewService.ts";
+import type { ReviewApiDto } from "../services/reviewService.ts";
+import { recentViewService } from "../services/recentViewService.ts";
 import ImageCarousel     from "../components/apartmentDetail/ImageCarousel.tsx";
 import AdditionalInfoTab from "../components/apartmentDetail/AdditionaInfoTab.tsx";
 import ApartmentInfoPanel from "../components/apartmentDetail/ApartmentInfoPanel.tsx";
@@ -22,14 +25,30 @@ const ApartmentDetail = () => {
     const { t }        = useTranslation();
     const [showRentSuccess, setShowRentSuccess] = useState(false);
     const [activeTab, setActiveTab]             = useState(0);
+    const [apartment, setApartment]             = useState<Apartment | null>(null);
+    const [reviews, setReviews]                 = useState<ReviewApiDto[]>([]);
+    const [loading, setLoading]                 = useState(true);
 
-    const apartment  = useMemo(() => apartments.find((a) => a.Id_Apartment === Number(id)), [id]);
-    const owner      = useMemo(() => apartment ? users.find((u) => u.Id_User === apartment.Id_Owner) : null, [apartment]);
-    const renter     = useMemo(() => apartment?.Id_Renter ? users.find((u) => u.Id_User === apartment.Id_Renter) : null, [apartment]);
-    const location   = useMemo(() => apartment ? getApartmentLocation(apartment.Id_Apartment)   : null, [apartment]);
-    const facilities = useMemo(() => apartment ? getApartmentFacilities(apartment.Id_Apartment) : null, [apartment]);
-    const addInfo    = useMemo(() => apartment ? getApartmentInfo(apartment.Id_Apartment)        : null, [apartment]);
-    const reviews    = useMemo(() => apartment ? getApartmentReviews(apartment.Id_Apartment)     : [],  [apartment]);
+    const currentUserId = 1;
+
+    useEffect(() => {
+        const apartmentId = Number(id);
+        setLoading(true);
+        apartmentService.getById(apartmentId)
+            .then(apt => {
+                setApartment(apt);
+                recentViewService.add(currentUserId, apartmentId).catch(() => {});
+                return reviewService.getByApartment(apartmentId);
+            })
+            .then(setReviews)
+            .finally(() => setLoading(false));
+    }, [id]);
+
+    const owner      = useMemo(() => apartment ? users.find((u) => u.Id_User === apartment.Id_Owner)  ?? null : null, [apartment]);
+    const renter     = useMemo(() => apartment?.Id_Renter ? users.find((u) => u.Id_User === apartment.Id_Renter) ?? null : null, [apartment]);
+    const location   = apartment?.location   ?? null;
+    const facilities = apartment?.facilities ?? null;
+    const addInfo    = apartment?.additionalInfo ?? null;
 
     // tabConfig în interiorul componentei — se re-evaluează la schimbarea limbii
     const tabConfig = [
@@ -39,6 +58,12 @@ const ApartmentDetail = () => {
         { label: t("apartment.tabs.reviews"),    icon: <StarIcon sx={{ fontSize: 18 }} /> },
     ];
 
+    if (loading) return (
+        <Box sx={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", bgcolor: "background.default" }}>
+            <Typography variant="h5" color="text.secondary">Se încarcă...</Typography>
+        </Box>
+    );
+
     if (!apartment) return (
         <Box sx={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", bgcolor: "background.default" }}>
             <Typography variant="h5" color="text.secondary">{t("apartment.notFound")}</Typography>
@@ -46,7 +71,7 @@ const ApartmentDetail = () => {
     );
 
     const isAvailable = apartment.Id_Renter === null;
-    const images      = [apartment.image_url, apartment.image_url, apartment.image_url];
+    const images      = apartment.image_url ? [apartment.image_url, apartment.image_url, apartment.image_url] : [];
     const statusChip  = (
         <Chip label={isAvailable ? t("listings.available") : t("listings.occupied")}
               sx={{ fontWeight: 700, fontSize: "14px", px: 2, py: 2.5, bgcolor: isAvailable ? "rgba(22,163,74,0.3)" : "rgba(220,38,38,0.3)", color: "white" }} />
