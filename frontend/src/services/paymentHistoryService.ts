@@ -1,7 +1,7 @@
-import axios from "axios";
+import axiosInstance from "../api/axiosInstance";
 import type { PaymentDto } from "../utils/pdf/buildInvoiceData";
 
-const BASE = "http://localhost:5062/api/payments";
+const BASE = "/payments";
 
 /** Shape returned by the backend PaymentController */
 export interface PaymentApiDto {
@@ -39,10 +39,10 @@ export function mapToPaymentDto(api: PaymentApiDto): PaymentDto {
 
 export const paymentHistoryService = {
     getByUser: (userId: number): Promise<PaymentDto[]> =>
-        axios.get<PaymentApiDto[]>(`${BASE}/user/${userId}`)
+        axiosInstance.get<PaymentApiDto[]>(`${BASE}/user/${userId}`)
             .then(r => r.data.map(mapToPaymentDto)),
 
     getByApartment: (apartmentId: number): Promise<PaymentDto[]> =>
-        axios.get<PaymentApiDto[]>(`${BASE}/apartment/${apartmentId}`)
+        axiosInstance.get<PaymentApiDto[]>(`${BASE}/apartment/${apartmentId}`)
             .then(r => r.data.map(mapToPaymentDto)),
 };

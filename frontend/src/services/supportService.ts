@@ -1,6 +1,6 @@
-import axios from "axios";
+import axiosInstance from "../api/axiosInstance";
 
-const BASE = "http://localhost:5062/api/support";
+const BASE = "/support";
 
 export interface SupportCreateDto {
     email:   string;
@@ -10,5 +10,5 @@ export interface SupportCreateDto {
 
 export const supportService = {
     create: (data: SupportCreateDto): Promise<string> =>
-        axios.post<string>(BASE, data).then(r => r.data),
+        axiosInstance.post<string>(BASE, data).then(r => r.data),
 };

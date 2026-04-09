@@ -8,9 +8,6 @@ import { useState }      from "react";
 import { gradients, colors } from "../../theme/gradients.ts";
 import { userService }   from "../../services/userService.ts";
 
-// Temporary: hardcoded until a real /auth/login endpoint is available.
-// Replace with actual API call + response token when backend exposes login.
-const TEMP_CURRENT_USER_ID = 1;
 
 const LoginForm = () => {
     const navigate    = useNavigate();
@@ -47,12 +44,12 @@ const LoginForm = () => {
         if (!validateForm()) return;
         setApiError(null);
         setLoading(true);
-        userService.getById(TEMP_CURRENT_USER_ID)
-            .then(user => {
+        userService.login(email, password)
+            .then(({ user }) => {
                 login(user);
                 navigate("/listings");
             })
-            .catch(() => setApiError("Could not reach server. Please try again."))
+            .catch(() => setApiError(t("auth.login.invalidCredentials") ?? "Email sau parolă incorectă."))
             .finally(() => setLoading(false));
     };
 

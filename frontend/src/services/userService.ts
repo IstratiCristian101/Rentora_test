@@ -1,7 +1,7 @@
-import axios from "axios";
+import axiosInstance from "../api/axiosInstance";
 import type { User } from "../types/user.types";
 
-const BASE = "http://localhost:5062/api/users";
+const BASE = "/users";
 
 export interface UserApiDto {
     id: number;
@@ -13,6 +13,11 @@ export interface UserApiDto {
     gender?: string | null;
     accountBalance: number;
     role: number;
+}
+
+export interface UserLoginResponseDto {
+    token: string;
+    user:  UserApiDto;
 }
 
 export interface UserUpdateDto {
@@ -40,15 +45,18 @@ export function mapUserApiToUser(dto: UserApiDto): User {
 }
 
 export const userService = {
+    login: (email: string, password: string): Promise<UserLoginResponseDto> =>
+        axiosInstance.post<UserLoginResponseDto>(`${BASE}/login`, { email, password }).then(r => r.data),
+
     getAll: (): Promise<UserApiDto[]> =>
-        axios.get<UserApiDto[]>(BASE).then(r => r.data),
+        axiosInstance.get<UserApiDto[]>(BASE).then(r => r.data),
 
     getById: (id: number): Promise<UserApiDto> =>
-        axios.get<UserApiDto>(`${BASE}/${id}`).then(r => r.data),
+        axiosInstance.get<UserApiDto>(`${BASE}/${id}`).then(r => r.data),
 
     update: (id: number, data: UserUpdateDto): Promise<string> =>
-        axios.put<string>(`${BASE}/${id}`, data).then(r => r.data),
+        axiosInstance.put<string>(`${BASE}/${id}`, data).then(r => r.data),
 
     delete: (id: number): Promise<string> =>
-        axios.delete<string>(`${BASE}/${id}`).then(r => r.data),
+        axiosInstance.delete<string>(`${BASE}/${id}`).then(r => r.data),
 };
