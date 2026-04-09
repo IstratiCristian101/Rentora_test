@@ -1,21 +1,24 @@
-﻿import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState } from "react";
+import type { UserApiDto } from "../services/userService";
 
 type AuthContextType = {
     isAuthenticated: boolean;
-    login: () => void;
-    logout: () => void;
+    currentUser:     UserApiDto | null;
+    login:           (user: UserApiDto) => void;
+    logout:          () => void;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [currentUser, setCurrentUser]         = useState<UserApiDto | null>(null);
 
-    const login = () => setIsAuthenticated(true);
-    const logout = () => setIsAuthenticated(false);
+    const login  = (user: UserApiDto) => { setCurrentUser(user); setIsAuthenticated(true); };
+    const logout = ()                  => { setCurrentUser(null); setIsAuthenticated(false); };
 
     return (
-        <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
+        <AuthContext.Provider value={{ isAuthenticated, currentUser, login, logout }}>
             {children}
         </AuthContext.Provider>
     );

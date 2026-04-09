@@ -1,16 +1,17 @@
 ﻿// pages/ApartmentDetail.tsx
 import { useParams, useNavigate } from "react-router-dom";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation }         from "react-i18next";
 import { Box, Container, Typography, Button, Chip, Alert, Paper, Tabs, Tab } from "@mui/material";
 import { ArrowBack as ArrowBackIcon, LocationOn as LocationOnIcon, Wifi as WifiIcon, MeetingRoom as RoomsIcon, Star as StarIcon } from "@mui/icons-material";
 import type { Apartment }    from "../types/apartment.types";
-import { users }             from "../mockdata/users";
+import type { User }         from "../types/user.types";
 import { colors }            from "../theme/gradients.ts";
 import { apartmentService }  from "../services/apartmentService.ts";
 import { reviewService }     from "../services/reviewService.ts";
 import type { ReviewApiDto } from "../services/reviewService.ts";
 import { recentViewService } from "../services/recentViewService.ts";
+import { userService, mapUserApiToUser } from "../services/userService.ts";
 import ImageCarousel     from "../components/apartmentDetail/ImageCarousel.tsx";
 import AdditionalInfoTab from "../components/apartmentDetail/AdditionaInfoTab.tsx";
 import ApartmentInfoPanel from "../components/apartmentDetail/ApartmentInfoPanel.tsx";
@@ -27,6 +28,8 @@ const ApartmentDetail = () => {
     const [activeTab, setActiveTab]             = useState(0);
     const [apartment, setApartment]             = useState<Apartment | null>(null);
     const [reviews, setReviews]                 = useState<ReviewApiDto[]>([]);
+    const [owner, setOwner]                     = useState<User | null>(null);
+    const [renter, setRenter]                   = useState<User | null>(null);
     const [loading, setLoading]                 = useState(true);
 
     const currentUserId = 1;
@@ -34,18 +37,21 @@ const ApartmentDetail = () => {
     useEffect(() => {
         const apartmentId = Number(id);
         setLoading(true);
+        setOwner(null);
+        setRenter(null);
         apartmentService.getById(apartmentId)
             .then(apt => {
                 setApartment(apt);
-                recentViewService.add(currentUserId, apartmentId).catch(() => {});
+                if (apt) {
+                    recentViewService.add(currentUserId, apartmentId).catch(() => {});
+                    userService.getById(apt.Id_Owner).then(u => setOwner(mapUserApiToUser(u))).catch(() => {});
+                    if (apt.Id_Renter) userService.getById(apt.Id_Renter).then(u => setRenter(mapUserApiToUser(u))).catch(() => {});
+                }
                 return reviewService.getByApartment(apartmentId);
             })
             .then(setReviews)
             .finally(() => setLoading(false));
     }, [id]);
-
-    const owner      = useMemo(() => apartment ? users.find((u) => u.Id_User === apartment.Id_Owner)  ?? null : null, [apartment]);
-    const renter     = useMemo(() => apartment?.Id_Renter ? users.find((u) => u.Id_User === apartment.Id_Renter) ?? null : null, [apartment]);
     const location   = apartment?.location   ?? null;
     const facilities = apartment?.facilities ?? null;
     const addInfo    = apartment?.additionalInfo ?? null;

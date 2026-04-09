@@ -1,18 +1,17 @@
-﻿// components/dashboard/MyListingsTab.tsx
+// components/dashboard/MyListingsTab.tsx
 import { Box, Typography }  from "@mui/material";
 import { useTranslation }   from "react-i18next";
-import { users }            from "../../mockdata/users";
 import ApartmentCard        from "../listing/ApartmentCard.tsx";
 import type { Apartment }   from "../../types/apartment.types";
-import type { User }        from "../../types/user.types";
 
 interface Props {
     myListings:       Apartment[];
     favoriteIds:      number[];
     onToggleFavorite: (id: number) => void;
+    getUserName:      (id: number) => string;
 }
 
-export default function MyListingsTab({ myListings, favoriteIds, onToggleFavorite }: Props) {
+export default function MyListingsTab({ myListings, favoriteIds, onToggleFavorite, getUserName }: Props) {
     const { t } = useTranslation();
 
     if (myListings.length === 0) return (
@@ -31,7 +30,7 @@ export default function MyListingsTab({ myListings, favoriteIds, onToggleFavorit
                     apartment={apt}
                     favorites={favoriteIds}
                     toggleFavorite={onToggleFavorite}
-                    getUserName={(id) => users.find((u: User) => u.Id_User === id)?.Name || "User"}
+                    getUserName={getUserName}
                     getStatus={(apartment: Apartment) => apartment.Id_Renter
                         ? t("listings.occupied")
                         : t("listings.available")}
