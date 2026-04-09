@@ -1,11 +1,13 @@
-﻿// components/login/LoginForm.tsx
-import { Box, Button, Container, Paper, TextField, Typography, Tabs, Tab, Stack } from "@mui/material";
+// components/login/LoginForm.tsx
+import { Box, Button, Container, Paper, TextField, Typography, Tabs, Tab, Stack, Alert } from "@mui/material";
 import ApartmentIcon     from "@mui/icons-material/Apartment";
 import { useNavigate }   from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth }       from "../../auth/AuthContext.tsx";
 import { useState }      from "react";
 import { gradients, colors } from "../../theme/gradients.ts";
+import { userService }   from "../../services/userService.ts";
+
 
 const LoginForm = () => {
     const navigate    = useNavigate();
@@ -16,6 +18,8 @@ const LoginForm = () => {
     const [email, setEmail]       = useState("");
     const [password, setPassword] = useState("");
     const [errors, setErrors]     = useState<{ email?: string; password?: string }>({});
+    const [apiError, setApiError] = useState<string | null>(null);
+    const [loading, setLoading]   = useState(false);
 
     const handleTabChange = (e: React.SyntheticEvent, newValue: "proprietar" | "chirias") => {
         e.preventDefault();
@@ -26,22 +30,27 @@ const LoginForm = () => {
         const newErrors: { email?: string; password?: string } = {};
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-        if (!email.trim())             newErrors.email    = t("auth.login.emailRequired");
-        else if (!emailRegex.test(email)) newErrors.email = t("auth.login.emailInvalid");
+        if (!email.trim())                newErrors.email    = t("auth.login.emailRequired");
+        else if (!emailRegex.test(email)) newErrors.email    = t("auth.login.emailInvalid");
 
-        if (!password.trim())          newErrors.password = t("auth.login.passwordRequired");
-        else if (password.length < 6)  newErrors.password = t("auth.login.passwordMin");
+        if (!password.trim())             newErrors.password = t("auth.login.passwordRequired");
+        else if (password.length < 6)     newErrors.password = t("auth.login.passwordMin");
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
 
     const handleSubmit = () => {
-        if (validateForm()) {
-            const data = {userType: userType,email:email,password:password};
-            login();
-            navigate("/listings");
-        }
+        if (!validateForm()) return;
+        setApiError(null);
+        setLoading(true);
+        userService.login(email, password)
+            .then(({ user }) => {
+                login(user);
+                navigate("/listings");
+            })
+            .catch(() => setApiError(t("auth.login.invalidCredentials") ?? "Email sau parolă incorectă."))
+            .finally(() => setLoading(false));
     };
 
     return (
@@ -71,6 +80,8 @@ const LoginForm = () => {
                     {userType === "proprietar" ? t("auth.login.portalLandlord") : t("auth.login.portalTenant")}
                 </Typography>
 
+                {apiError && <Alert severity="error" sx={{ mb: 2 }}>{apiError}</Alert>}
+
                 <Stack spacing={2.5}>
                     <TextField
                         label={t("auth.login.email")} type="email" fullWidth
@@ -84,10 +95,10 @@ const LoginForm = () => {
                         onChange={(e) => { setPassword(e.target.value); if (errors.password) setErrors({ ...errors, password: undefined }); }}
                         error={!!errors.password} helperText={errors.password}
                     />
-                    <Button fullWidth size="large" variant="contained"
+                    <Button fullWidth size="large" variant="contained" disabled={loading}
                             sx={{ mt: 1, py: 1.8, borderRadius: 3, fontSize: "16px" }}
                             onClick={handleSubmit}>
-                        {t("auth.login.submit")}
+                        {loading ? t("auth.login.loading") ?? "Loading…" : t("auth.login.submit")}
                     </Button>
                 </Stack>
 

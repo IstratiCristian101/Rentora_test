@@ -1,13 +1,13 @@
-﻿// components/dashboard/ProfileTab.tsx
+// components/dashboard/ProfileTab.tsx
 import { Box, Button, Paper, Stack, Typography } from "@mui/material";
 import { useNavigate }    from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { colors }         from "../../theme/gradients";
 import { paths }          from "../../app/paths";
-import type { User }      from "../../types/user.types";
+import type { UserApiDto } from "../../services/userService";
 
 interface Props {
-    currentUser:    User | null;
+    currentUser:    UserApiDto | null;
     onEditProfile?: () => void;
 }
 
@@ -30,9 +30,9 @@ export default function ProfileTab({ currentUser }: Props) {
     );
 
     const fields = [
-        { label: t("dashboard.profile.email"),    value: currentUser.Email    || "—" },
-        { label: t("dashboard.profile.phone"),    value: currentUser.Phone    || "—" },
-        { label: t("dashboard.profile.birthday"), value: currentUser.Birthday || "—" },
+        { label: t("dashboard.profile.email"),    value: currentUser.email    || "—" },
+        { label: t("dashboard.profile.phone"),    value: currentUser.phone    || "—" },
+        { label: t("dashboard.profile.birthday"), value: currentUser.birthday?.split("T")[0] || "—" },
     ];
 
     return (
@@ -42,7 +42,7 @@ export default function ProfileTab({ currentUser }: Props) {
                        alignItems={{ xs: "flex-start", sm: "center" }} gap={3}>
                     <Box>
                         <Typography variant="h5" fontWeight={900} sx={{ mb: 2 }}>
-                            {currentUser.Name} {currentUser.Surname}
+                            {currentUser.name} {currentUser.surname}
                         </Typography>
                         <Stack spacing={1}>
                             {fields.map(({ label, value }) => (

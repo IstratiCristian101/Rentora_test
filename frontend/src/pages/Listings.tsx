@@ -4,7 +4,7 @@ import { Home as HomeIcon, TrendingUp as TrendingUpIcon, FilterList as FilterLis
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation }    from "react-i18next";
 import type { Apartment }    from "../types/apartment.types.ts";
-import { users }             from "../mockdata/users.ts";
+import { userService }       from "../services/userService.ts";
 import ApartmentCard         from "../components/listing/ApartmentCard.tsx";
 import SearchBar             from "../components/listing/SearchBar.tsx";
 import FilterDrawer          from "../components/filter/FilterDrawer.tsx";
@@ -23,17 +23,20 @@ const Listings = () => {
     const [pendingFilters, setPendingFilters] = useState<FilterState>(defaultFilters);
     const [appliedFilters, setAppliedFilters] = useState<FilterState>(defaultFilters);
     const [currentPage, setCurrentPage]      = useState(1);
+    const [usersMap, setUsersMap]            = useState<Record<number, string>>({});
 
     useEffect(() => {
         apartmentService.getAll().then(setApartments).catch(() => setApartments([]));
+        userService.getAll()
+            .then(list => setUsersMap(Object.fromEntries(list.map(u => [u.id, u.name]))))
+            .catch(() => {});
     }, []);
 
     const toggleFavorite = (id: number) =>
         setFavorites((prev) => prev.includes(id) ? prev.filter((favId) => favId !== id) : [...prev, id]);
 
-    const getStatus  = (apt: Apartment) => apt.Id_Renter !== null ? t("listings.occupied") : t("listings.available");
-    const usersMap   = useMemo(() => Object.fromEntries(users.map((user) => [user.Id_User, user.Name])), []);
-    const getUserName = useCallback((userId: number) => usersMap[userId] ?? t("listings.available"), [usersMap, t]);
+    const getStatus   = (apt: Apartment) => apt.Id_Renter !== null ? t("listings.occupied") : t("listings.available");
+    const getUserName = useCallback((userId: number) => usersMap[userId] ?? `User #${userId}`, [usersMap]);
 
     const activeFilterCount = useMemo(() => {
         const filters = appliedFilters;

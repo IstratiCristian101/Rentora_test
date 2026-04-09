@@ -16,6 +16,15 @@ public class UserController : ControllerBase
         _userAction = bl.UserAction();
     }
 
+    [HttpPost("login")]
+    public IActionResult Login([FromBody] UserLoginDto data)
+    {
+        var result = _userAction.Login(data);
+        if (result is Rentora.Domain.Models.Responses.ActionResponse resp && !resp.IsSuccess)
+            return Unauthorized(resp.Message);
+        return Ok(result);
+    }
+
     [HttpGet]
     public IActionResult GetAll()
     {

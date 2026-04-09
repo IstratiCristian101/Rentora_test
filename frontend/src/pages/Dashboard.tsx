@@ -1,10 +1,11 @@
-﻿// pages/Dashboard.tsx
-import { useEffect, useMemo, useState } from "react";
+// pages/Dashboard.tsx
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate }         from "react-router-dom";
 import { useTranslation }      from "react-i18next";
 import { Box, Container, Paper, Tab, Tabs, Typography } from "@mui/material";
 import type { Apartment }      from "../types/apartment.types";
-import { users }               from "../mockdata/users";
+import { useAuth }             from "../auth/AuthContext";
+import { userService }         from "../services/userService";
 import { apartmentService }    from "../services/apartmentService";
 import { paths }               from "../app/paths";
 import { gradients, colors }   from "../theme/gradients";
@@ -27,20 +28,25 @@ function getFavorites(): number[] {
 function setFavorites(ids: number[]) { localStorage.setItem(FAVORITES_KEY, JSON.stringify(ids)); }
 
 export default function Dashboard() {
-    const navigate      = useNavigate();
-    const { t }         = useTranslation();
-    const [tab, setTab] = useState<DashboardTab>(0);
-    const currentUserId = 1;
+    const navigate        = useNavigate();
+    const { t }           = useTranslation();
+    const { currentUser } = useAuth();
+    const [tab, setTab]   = useState<DashboardTab>(0);
 
-    const currentUser                    = useMemo(() => users.find((u) => u.Id_User === currentUserId) ?? null, []);
-    const [myListings, setMyListings]    = useState<Apartment[]>([]);
+    const currentUserId = currentUser?.id ?? 1;
+
+    const [myListings, setMyListings]       = useState<Apartment[]>([]);
     const [allApartments, setAllApartments] = useState<Apartment[]>([]);
-    const [favoriteIds, setFavoriteIds]  = useState<number[]>(() => getFavorites());
+    const [favoriteIds, setFavoriteIds]     = useState<number[]>(() => getFavorites());
+    const [usersMap, setUsersMap]           = useState<Record<number, string>>({});
 
     useEffect(() => {
         apartmentService.getByOwner(currentUserId).then(setMyListings).catch(() => setMyListings([]));
         apartmentService.getAll().then(setAllApartments).catch(() => setAllApartments([]));
-    }, []);
+        userService.getAll()
+            .then(list => setUsersMap(Object.fromEntries(list.map(u => [u.id, u.name]))))
+            .catch(() => {});
+    }, [currentUserId]);
 
     const favoriteApartments = useMemo(() => {
         const set = new Set(favoriteIds);
@@ -54,6 +60,8 @@ export default function Dashboard() {
             return next;
         });
     };
+
+    const getUserName = useCallback((id: number) => usersMap[id] ?? `User #${id}`, [usersMap]);
 
     return (
         <Container maxWidth="lg" sx={{ py: { xs: 4, md: 8 }, minHeight: "100vh", mt: 10 }}>
@@ -80,9 +88,9 @@ export default function Dashboard() {
 
                 <Box sx={{ pt: 6 }}>
                     {tab === 0 && <ProfileTab    currentUser={currentUser} onEditProfile={() => navigate(paths.settings)} />}
-                    {tab === 1 && <MyListingsTab myListings={myListings}   favoriteIds={favoriteIds} onToggleFavorite={toggleFavorite} />}
+                    {tab === 1 && <MyListingsTab myListings={myListings}   favoriteIds={favoriteIds} onToggleFavorite={toggleFavorite} getUserName={getUserName} />}
                     {tab === 2 && <PaymentsTab />}
-                    {tab === 3 && <FavoritesTab  favoriteApartments={favoriteApartments} favoriteIds={favoriteIds} onToggleFavorite={toggleFavorite} />}
+                    {tab === 3 && <FavoritesTab  favoriteApartments={favoriteApartments} favoriteIds={favoriteIds} onToggleFavorite={toggleFavorite} getUserName={getUserName} />}
                 </Box>
             </Paper>
         </Container>
